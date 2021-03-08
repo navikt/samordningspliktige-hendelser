@@ -44,7 +44,7 @@ internal class FeedControllerAuthTest {
     @Throws(Exception::class)
     fun expired_token_is_unauthorized() {
         mockMvc.perform(get(ENDPOINT)
-                .header(AUTH_HEADER_NAME, expiredToken(ORG_NUMBER_2))
+                .header(AUTH_HEADER_NAME, expiredToken(ORG_NUMBER_2, "https://badserver/provider/"))
                 .param(TPNR_PARAM_NAME, TPNR_2))
                 .andExpect(status().isUnauthorized)
     }
@@ -53,8 +53,17 @@ internal class FeedControllerAuthTest {
     @Throws(Exception::class)
     fun future_token_is_unauthorized() {
         mockMvc.perform(get(ENDPOINT)
-                .header(AUTH_HEADER_NAME, futureToken(ORG_NUMBER_2))
+                .header(AUTH_HEADER_NAME, futureToken(ORG_NUMBER_2, "https://badserver/provider/"))
                 .param(TPNR_PARAM_NAME, TPNR_2))
+                .andExpect(status().isUnauthorized)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun invalid_token_signature_is_unauthorized() {
+        mockMvc.perform(get(ENDPOINT)
+                .header(AUTH_HEADER_NAME, token(ORG_NUMBER_1, false))
+                .param(TPNR_PARAM_NAME, TPNR_1))
                 .andExpect(status().isUnauthorized)
     }
 
@@ -62,9 +71,9 @@ internal class FeedControllerAuthTest {
     @Throws(Exception::class)
     fun invalid_token_issuer_is_unauthorized() {
         mockMvc.perform(get(ENDPOINT)
-                .header(AUTH_HEADER_NAME, token(ORG_NUMBER_1, false))
-                .param(TPNR_PARAM_NAME, TPNR_1))
-                .andExpect(status().isUnauthorized)
+            .header(AUTH_HEADER_NAME, token(ORG_NUMBER_1, false, "http://localhost:8080"))
+            .param(TPNR_PARAM_NAME, TPNR_1))
+            .andExpect(status().isUnauthorized)
     }
 
     @Test

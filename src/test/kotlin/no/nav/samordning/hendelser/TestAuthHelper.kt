@@ -9,12 +9,12 @@ object TestAuthHelper {
     private const val AUTH_SCHEME = "Bearer"
 
     @Throws(NoSuchAlgorithmException::class)
-    fun token(orgno: String, verifiedSignature: Boolean) =
-            header(TestTokenHelper.token(orgno, verifiedSignature))
+    fun token(orgno: String, verifiedSignature: Boolean, iss: String? = "https://badserver/provider/") =
+        header(TestTokenHelper.token(orgno, verifiedSignature, iss))
 
-    fun expiredToken(orgno: String) = header(createExpiredJwt(orgno))
+    fun expiredToken(orgno: String, iss: String?) = header(createExpiredJwt(orgno, iss))
 
-    fun futureToken(orgno: String) = header(createFutureJwt(orgno))
+    fun futureToken(orgno: String, iss: String?) = header(createFutureJwt(orgno, iss))
 
     fun serviceToken() = header(TestTokenHelper.serviceToken())
 

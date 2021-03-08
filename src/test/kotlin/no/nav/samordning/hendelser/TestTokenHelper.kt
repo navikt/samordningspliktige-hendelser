@@ -21,13 +21,13 @@ object TestTokenHelper {
         get() = publicKey(keyPair).modulus.toByteArray()
 
     @Throws(NoSuchAlgorithmException::class)
-    fun token(orgno: String, verifiedSignature: Boolean) = token(DEFAULT_SCOPE, orgno, verifiedSignature)
+    fun token(orgno: String, verifiedSignature: Boolean, iss: String? = "https://badserver/provider/") = token(DEFAULT_SCOPE, orgno, verifiedSignature, iss)
 
     @Throws(NoSuchAlgorithmException::class)
-    fun token(scope: String, orgno: String, verifiedSignature: Boolean): String {
+    fun token(scope: String, orgno: String, verifiedSignature: Boolean, iss: String? = "https://badserver/provider/"): String {
         val signingKeys = if (verifiedSignature) keyPair else generatedKeyPair
         val algorithm = Algorithm.RSA256(publicKey(signingKeys), privateKey(signingKeys))
-        return createJwt(scope, orgno, algorithm)
+        return createJwt(scope, orgno, algorithm, iss)
     }
 
     fun serviceToken() = createServiceJwt(algorithm)!!
@@ -47,22 +47,21 @@ object TestTokenHelper {
                 }""".trimMargin(),
             Base64.getUrlEncoder().encodeToString(keyModulus))
 
-    internal fun createExpiredJwt(orgno: String) = addClaims(expiredJwt, orgno, algorithm)
+    internal fun createExpiredJwt(orgno: String, iss: String?) = addClaims(expiredJwt, orgno, algorithm, iss)
 
-    internal fun createFutureJwt(orgno: String) = addClaims(futureJwt, orgno, algorithm)
+    internal fun createFutureJwt(orgno: String, iss: String?) = addClaims(futureJwt, orgno, algorithm, iss)
 
-    private fun createJwt(scope: String, orgno: String, algorithm: Algorithm) =
-            addClaims(JWT.create(), scope, orgno, algorithm)
+    private fun createJwt(scope: String, orgno: String, algorithm: Algorithm, iss: String?) =
+            addClaims(JWT.create(), scope, orgno, algorithm, iss)
 
-    private fun addClaims(jwt: JWTCreator.Builder, orgno: String, algorithm: Algorithm) =
-            addClaims(jwt, DEFAULT_SCOPE, orgno, algorithm)
+    private fun addClaims(jwt: JWTCreator.Builder, orgno: String, algorithm: Algorithm, iss: String?) =
+            addClaims(jwt, DEFAULT_SCOPE, orgno, algorithm, iss)
 
-    private fun addClaims(jwt: JWTCreator.Builder, scope: String, orgno: String, algorithm: Algorithm) = jwt
+    private fun addClaims(jwt: JWTCreator.Builder, scope: String, orgno: String, algorithm: Algorithm, iss: String?) = jwt
             .withArrayClaim("aud", arrayOf("tp_ordning", "preprod"))
-            .withClaim("iss", "https://badserver/provider/")
+            .withClaim("iss", iss)
             .withClaim("scope", scope)
-            .withClaim("client_id", "tp_ordning")
-            .withClaim("client_orgno", orgno)
+            .withClaim("consumer", """{ "authority" : "iso6523-actorid-upis", "ID" : "0192:$orgno"}""")
             .sign(algorithm)
 
     private fun createServiceJwt(algorithm: Algorithm) = JWT.create()

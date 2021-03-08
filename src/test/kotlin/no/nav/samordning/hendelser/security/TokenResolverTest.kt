@@ -3,7 +3,9 @@ package no.nav.samordning.hendelser.security
 import no.nav.samordning.hendelser.TestTokenHelper.serviceToken
 import no.nav.samordning.hendelser.TestTokenHelper.token
 import no.nav.samordning.hendelser.consumer.TpregisteretConsumer
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.any
@@ -71,7 +73,7 @@ internal class TokenResolverTest {
 
         val exception = assertThrows(OAuth2AuthenticationException::class.java) { resolver.resolve(request) }
 
-        assertEquals("Missing parameters: client_id, client_orgno, scope", exception.message)
+        assertEquals("Missing parameters: consumer, scope", exception.message)
     }
 
     companion object {

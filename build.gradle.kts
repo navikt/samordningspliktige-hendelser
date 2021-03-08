@@ -1,3 +1,4 @@
+import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 group = "no.nav.samordning"
@@ -10,8 +11,8 @@ val slf4jVersion = "1.7.30"
 val log4jVersion = "2.13.3"
 
 plugins {
-    kotlin("jvm") version "1.3.72"
-    kotlin("plugin.spring") version "1.3.72"
+    kotlin("jvm") version "1.4.31"
+    kotlin("plugin.spring") version "1.4.31"
     id("org.springframework.boot") version "2.3.0.RELEASE"
     id("io.spring.dependency-management") version "1.0.9.RELEASE"
 }
@@ -34,6 +35,7 @@ dependencies {
     implementation("org.springframework.boot","spring-boot-starter-oauth2-resource-server")
     implementation("org.springframework.security.oauth","spring-security-oauth2","2.5.0.RELEASE")
     implementation("org.springframework.cloud","spring-cloud-vault-config-databases","2.2.2.RELEASE")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     runtimeOnly("org.springframework.cloud","spring-cloud-starter-vault-config","2.1.3.RELEASE")
     testImplementation(kotlin("test-junit5"))
     testImplementation("org.springframework.boot","spring-boot-starter-test") {
@@ -61,5 +63,9 @@ tasks{
     test {
         useJUnitPlatform()
     }
-
+    withType<Test> {
+        testLogging {
+            events(TestLogEvent.PASSED, TestLogEvent.SKIPPED, TestLogEvent.FAILED)
+        }
+    }
 }
